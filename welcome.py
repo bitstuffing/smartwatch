@@ -2,25 +2,34 @@ import network
 import utime
 import sys
 import ntptime
+import machine
+from menu import Menu
 from screenutils import ScreenUtils
 
 class Welcome(object):
 
-    def __init__(self):
-        self.screen = ScreenUtils()
+    def __init__(self,oled):
+        self.screen = ScreenUtils(oled)
         self.welcome()
         try:
             self.checkConnection()
             self.synchronizeTime()
-            menu = False
-            while not menu:
-                self.getTime()
-                utime.sleep_ms(100)
-                #TODO menu button here
+            self.menu = False
+            pin = machine.Pin(13, machine.Pin.IN,machine.Pin.PULL_UP)
+            pin.irq(trigger=machine.Pin.IRQ_FALLING, handler=self.menuButton)
+            while True:
+                if not self.menu:
+                    self.getTime()
+                utime.sleep_ms(500)
+
         except Exception as e:
             print("Something goes wrong!"+str(e))
             sys.print_exception(e)
             pass
+
+    def menuButton(self,pin):
+        self.menu = True
+        Menu().displayMenu(self)
 
     def getTime(self):
         year, month, day, hour, minute, second, ms, dayinyear = utime.localtime()
@@ -50,4 +59,4 @@ class Welcome(object):
             utime.sleep_ms(250)
             text+="."
             self.screen.writeText(text=text,delay=False)
-        self.screen.writeText(text='Connected with ip '+str(sta_if.ifconfig()),delay=True)
+        self.screen.writeText(text='Connected with ip '+str(sta_if.ifconfig()),delay=False)
