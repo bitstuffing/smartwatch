@@ -3,8 +3,8 @@ import utime
 import sys
 import ntptime
 import machine
-from menu import Menu
-from screenutils import ScreenUtils
+from scripts.menu import Menu
+from library.screenutils import ScreenUtils
 
 class Welcome(object):
 
@@ -17,11 +17,9 @@ class Welcome(object):
             self.menu = False
             pin = machine.Pin(13, machine.Pin.IN,machine.Pin.PULL_UP)
             pin.irq(trigger=machine.Pin.IRQ_FALLING, handler=self.menuButton)
-            while True:
-                if not self.menu:
-                    self.getTime()
+            while not self.menu:
+                self.getTime()
                 utime.sleep_ms(500)
-
         except Exception as e:
             print("Something goes wrong!"+str(e))
             sys.print_exception(e)
