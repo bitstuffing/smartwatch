@@ -36,11 +36,11 @@ class ScreenUtils(object):
                     self.oled.show()
         self.oled.show()
 
-    def draw_line(self, x0, y0, x1, y1):
+    def draw_line(self, x0, y0, x1, y1): #TODO, review bug point1 < point2
         deltax = x1 - x0
         deltay = y1 - y0
         error = -1.0
-        if deltax is not 0: # Assume deltax != 0 (line is not vertical)
+        if deltax != 0:
             deltaerr = abs(deltay / deltax)
             y = y0
             for x in range(int(x0), int(x1)-1):

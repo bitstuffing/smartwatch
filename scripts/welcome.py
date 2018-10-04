@@ -5,6 +5,7 @@ import ntptime
 import machine
 from scripts.menu import Menu
 from library.screenutils import ScreenUtils
+from scripts.clock import Clock
 
 class Welcome(object):
 
@@ -29,10 +30,15 @@ class Welcome(object):
         self.menu = True
         Menu().displayMenu(self)
 
-    def getTime(self):
+    def getTime(self,analog=True):
         year, month, day, hour, minute, second, ms, dayinyear = utime.localtime()
-        localtime = "{:0>2d}".format(hour)+":"+"{:0>2d}".format(minute)+":"+"{:0>2d}".format(second)+"     "+"{:0>2d}".format(day)+"/"+"{:0>2d}".format(month)+"/"+str(year)
-        self.screen.writeText(text=localtime)
+        if not analog:
+            localtime = "{:0>2d}".format(hour)+":"+"{:0>2d}".format(minute)+":"+"{:0>2d}".format(second)+"     "+"{:0>2d}".format(day)+"/"+"{:0>2d}".format(month)+"/"+str(year)
+            self.screen.writeText(text=localtime)
+        else:
+            self.screen.oled.fill(0)
+            Clock().displayClock(screen=self.screen,hours=hour,minutes=minute,seconds=second)
+
 
     def synchronizeTime(self):
         ntptime.settime()
