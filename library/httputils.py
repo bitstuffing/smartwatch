@@ -4,7 +4,13 @@ import gc
 class HttpUtils():
 
     @staticmethod
-    def get_url(url, data=None, method='GET',headers={},brute_response=False):
+    def download_url(url,filename='temp.tmp'):
+        headers={}
+        headers["User-Agent"]="Mozilla/5.0 (X11; Linux x86_64; rv:62.0) Gecko/20100101 Firefox/62.0"
+        HttpUtils.get_url(url=url,headers=headers,download=True,fileName=filename)
+
+    @staticmethod
+    def get_url(url, data=None, method='GET',headers={},brute_response=False,download=False,fileName=''):
         if data is not None:
             method = 'POST'
         response = ''
@@ -37,24 +43,33 @@ class HttpUtils():
             if data:
                 s.write(b"Content-Length: %d\r\n" % len(data))
             s.write(b"\r\n")
-            bruteResponse = s.read()
-            s.close()
-            #memory issues fix
-            #f = s.makefile()
-            #bruteResponse = b''
-            #line = f.readline()
-            #while line:
-            #    bruteResponse+=line
-            #    line = f.readline()
-            #f.close()
-            gc.collect()
-            bruteResponse = bruteResponse.decode("utf-8")
-            if not brute_response and "\r\n\r\n" in bruteResponse:
-                response = bruteResponse[bruteResponse.index("\r\n\r\n")+len("\r\n\r\n"):]
-            elif not brute_response and "\n\n" in bruteResponse:
-                response = bruteResponse[bruteResponse.index("\n\n")+len("\n\n"):]
+            if not download:
+                bruteResponse = s.read()
+                s.close()
+
+                #memory issues fix
+                #f = s.makefile()
+                #bruteResponse = b''
+                #line = f.readline()
+                #while line:
+                #    bruteResponse+=line
+                #    line = f.readline()
+                #f.close()
+                gc.collect()
+                bruteResponse = bruteResponse.decode("utf-8")
+                if not brute_response and "\r\n\r\n" in bruteResponse:
+                    response = bruteResponse[bruteResponse.index("\r\n\r\n")+len("\r\n\r\n"):]
+                elif not brute_response and "\n\n" in bruteResponse:
+                    response = bruteResponse[bruteResponse.index("\n\n")+len("\n\n"):]
+                else:
+                    response = bruteResponse
             else:
-                response = bruteResponse
+                forigin = s.makefile()
+                fdest = open(fileName,"w")
+                fdest.write(forigin.read())
+                fdest.close()
+                forigin.close()
+                s.close()
         except OSError:
             s.close()
             pass
