@@ -30,8 +30,8 @@ class Clock():
 
     def displayClock(self,screen,hours=0,minutes=0,seconds=0,ratio=32,originx=64,originy=32):
         hours = hours % 12
-        x, y = self.getTickPosition(tick=hours,radio=int(ratio/3),originx=originx,originy=originy)
-        x2, y2 = self.getTickPosition(tick=minutes,radio=int(ratio/2),originx=originx,originy=originy)
+        x, y = self.getTickPosition(tick=hours,radio=int(ratio/2),originx=originx,originy=originy)
+        x2, y2 = self.getTickPosition(tick=minutes,radio=int(ratio*2/3),originx=originx,originy=originy)
         x3, y3 = self.getTickPosition(tick=seconds,radio=ratio,originx=originx,originy=originy)
         screen.draw_circle(originx,originy,ratio)
         screen.draw_line(originx,originy,x,y)
