@@ -19,7 +19,7 @@ class Welcome(object):
             pin = machine.Pin(13, machine.Pin.IN,machine.Pin.PULL_UP)
             pin.irq(trigger=machine.Pin.IRQ_FALLING, handler=self.menuButton)
             while not self.menu:
-                self.getTime()
+                self.getTime(analog=True)
                 utime.sleep_ms(500)
         except Exception as e:
             print("Something goes wrong!"+str(e))
@@ -31,7 +31,23 @@ class Welcome(object):
         Menu().displayMenu(self)
 
     def getTime(self,analog=True):
-        year, month, day, hour, minute, second, ms, dayinyear = utime.localtime()
+        #year, month, day, hour, minute, second, ms, dayinyear = utime.localtime()
+        #timezone issues, convert
+        year = utime.localtime()[0] #get current year
+        #calculate last sunday of march and october
+        HHMarch = utime.mktime((year,3 ,(27-(int(5*year/4+1))%7),1,0,0,0,0,0)) #Time of March change to Sumer
+        HHOctober = utime.mktime((year,10,(31-(int(5*year/4+1))%7),1,0,0,0,0,0)) #Time of October change to Winter
+        #then calculate and convert
+        now=utime.time()
+        SUMMER = 3600 #+1h in summer
+        TIMEZONE = 3600 #TODO configure this parameter
+        if now < HHMarch: # WINTER
+            dst=utime.localtime(now+TIMEZONE)
+        elif now < HHOctober : # SUMMER
+            dst=utime.localtime(now+TIMEZONE+SUMMER)
+        else: # WINTER
+            dst=utime.localtime(now+TIMEZONE)
+        year, month, day, hour, minute, second, ms, dayinyear = dst
         if not analog:
             localtime = "{:0>2d}".format(hour)+":"+"{:0>2d}".format(minute)+":"+"{:0>2d}".format(second)+"     "+"{:0>2d}".format(day)+"/"+"{:0>2d}".format(month)+"/"+str(year)
             self.screen.writeText(text=localtime)
@@ -41,8 +57,8 @@ class Welcome(object):
 
 
     def synchronizeTime(self):
+        #first set utc time
         ntptime.settime()
-        pass
 
     def welcome(self):
         #oled.poweroff()
