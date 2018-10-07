@@ -36,25 +36,34 @@ class ScreenUtils(object):
                     self.oled.show()
         self.oled.show()
 
-    def draw_line(self, x0, y0, x1, y1): #TODO, review bug point1 < point2
-        deltax = x1 - x0
-        deltay = y1 - y0
-        error = -1.0
-        if deltax != 0:
-            deltaerr = abs(deltay / deltax)
-            y = y0
-            for x in range(int(x0), int(x1)-1):
-                # plot(x,y)
-                self.oled.pixel(x, y, 1)
-                # print(x, y)
-                error = error + deltaerr
-                if error >= 0.0:
-                    y = y + 1
-                    error = error - 1.0
-        else: #vertical line
-            for y in range(int(y0), int(y1)-1):
-                self.oled.pixel(x0, y, 1)
-                y = y + 1
+    def draw_line(self, x0, y0, x1, y1):
+        # Line drawing function.  Will draw a single pixel wide line starting at
+        # x0, y0 and ending at x1, y1.
+        steep = abs(y1 - y0) > abs(x1 - x0)
+        if steep:
+            x0, y0 = y0, x0
+            x1, y1 = y1, x1
+        if x0 > x1:
+            x0, x1 = x1, x0
+            y0, y1 = y1, y0
+        dx = x1 - x0
+        dy = abs(y1 - y0)
+        err = dx // 2
+        ystep = 0
+        if y0 < y1:
+            ystep = 1
+        else:
+            ystep = -1
+        while x0 <= x1:
+            if steep:
+                self.oled.pixel(int(y0), int(x0), 1)
+            else:
+                self.oled.pixel(int(x0), int(y0), 1)
+            err -= dy
+            if err < 0:
+                y0 += ystep
+                err += dx
+            x0 += 1
 
     def draw_circle(self, x0, y0, radius):
         x = radius
